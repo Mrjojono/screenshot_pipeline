@@ -1,5 +1,4 @@
 name: Run test
-
 on:
   push:
     branches: [ main ]
@@ -9,16 +8,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Install Chrome dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libasound2t64 || sudo apt apt-get install -y \
             libasound2t64 \
             libatk1.0-0 \
             libatk-bridge2.0-0 \
@@ -33,19 +39,42 @@ jobs:
             libxrandr2 \
             xdg-utils \
             libu2f-udev \
-            libvulkan1
+            libvulkan1 \
+            libxss1 \
+            libgconf-2-4
             
-      - name: Run Vite manually for debugging
-        run: npm run dev -- --host &
-        continue-on-error: true
-      - name: Wait for server
-        run: npx wait-on http://localhost:5173
+      - name: Build application
+        run: npm run build
 
-      - name: Install dependencies
-        run: npm install
+      - name: Start server in background
+        run: |
+          npm run preview -- --port 5173 --host &
+          echo $! > .vite-pid
+
+      - name: Wait for server to be ready
+        run: |
+          npx wait-on http://localhost:5173 --timeout 30000
 
       - name: Run tests
-        run: npm test -- --no-sandbox --disable-setuid-sandbox
+        run: npm test
         env:
-          PUPPETEER_DISABLE_SANDBOX: 'true'
-          PUPPETEER_ARGS: '--no-sandbox --disable-setuid-sandbox'
+          CI: true
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: false
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f .vite-pid ]; then
+            kill $(cat .vite-pid) || true
+            rm .vite-pid
+          fi
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            **/__tests__/**/*.png
+            **/__image_snapshots__/**/*.png
