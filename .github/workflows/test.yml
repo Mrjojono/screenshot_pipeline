@@ -18,6 +18,7 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm test
+        run: npm test -- --no-sandbox --disable-setuid-sandbox
         env:
           PUPPETEER_DISABLE_SANDBOX: 'true'
+          PUPPETEER_ARGS: '--no-sandbox --disable-setuid-sandbox'
