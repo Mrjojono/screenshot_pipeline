@@ -16,7 +16,9 @@ let   data = {
 
 
 test('Homepage ui should match the previous screenshot', async () =>{
-    const browser =  await  puppeteer.launch();
+    const browser =  await  puppeteer.launch({
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
     const page = await  browser.newPage();
     await  page.goto('http://localhost:5173/',{waitUntil:'networkidle0'});
     const screenshot2 = await  page.screenshot();
