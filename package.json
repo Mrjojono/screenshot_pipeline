@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "start-server-and-test dev http://localhost:5173 jest"
+    "test": "start-server-and-test dev http://localhost:5173 jest --timeout 120"
   },
   "dependencies": {
     "react": "^19.1.0",

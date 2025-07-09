@@ -34,6 +34,12 @@ jobs:
             xdg-utils \
             libu2f-udev \
             libvulkan1
+            
+      - name: Run Vite manually for debugging
+        run: npm run dev -- --host &
+        continue-on-error: true
+      - name: Wait for server
+        run: npx wait-on http://localhost:5173
 
       - name: Install dependencies
         run: npm install
