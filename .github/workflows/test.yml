@@ -19,3 +19,5 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          PUPPETEER_DISABLE_SANDBOX: 'true'
