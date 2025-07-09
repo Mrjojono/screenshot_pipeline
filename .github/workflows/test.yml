@@ -17,8 +17,10 @@ jobs:
       - name: Install Chrome dependencies
         run: |
           sudo apt-get update
+          sudo-get update
           sudo apt-get install -y \
-            libasound2 \
+            libasound2t64 || sudo apt apt-get install -y \
+            libasound2t64 \
             libatk1.0-0 \
             libatk-bridge2.0-0 \
             libcups2 \
@@ -33,6 +35,7 @@ jobs:
             xdg-utils \
             libu2f-udev \
             libvulkan1
+
       - name: Install dependencies
         run: npm install
 
